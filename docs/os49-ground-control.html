@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OS49 · Ground Control — Vitals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --obsidian:#0B0C0E; --panel:#15171C; --panel2:#1B1E25; --panel3:#22262E;
+  --line:rgba(233,228,220,.09); --line2:rgba(233,228,220,.16);
+  --ink:#E9E4DC; --ink2:#C9C4B9; --muted:#8E8A80; --faint:#65625B;
+  --copper:#9C5B42; --copper-br:#BC7053;
+  --red:#C0392B; --amber:#D9A441; --green:#2F8164; --purple:#8B68C2; --blueprint:#4F7BB0;
+  --d-ritme:#BC7053; --d-verank:#4F7BB0; --d-adoptie:#CBA14A; --d-result:#5E9E7E;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--obsidian); color:var(--ink);
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:13px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.display{font-family:'Cinzel',serif}
+.lbl{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:500}
+a{color:inherit}
+button{font-family:inherit; cursor:pointer}
+::selection{background:rgba(156,91,66,.35)}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex; align-items:center; gap:18px;
+  height:60px; padding:0 24px;
+  background:linear-gradient(180deg,#101216, #0c0d10);
+  border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:40;
+}
+.mark{width:34px;height:34px;border-radius:7px;background:var(--copper);
+  display:grid;place-items:center;font-family:'Cinzel';font-weight:700;color:#1a0f0a;font-size:18px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand .t{font-family:'Cinzel';font-weight:600;letter-spacing:.14em;font-size:13px}
+.brand .s{font-size:9.5px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase}
+.topbar .spacer{flex:1}
+.ctx{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px}
+.dotlive{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(47,129,100,.18)}
+.avatar{width:30px;height:30px;border-radius:50%;background:#2a2118 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"/>');
+  border:1px solid var(--line2);display:grid;place-items:center;font-size:11px;color:var(--copper-br);font-weight:700}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1320px;margin:0 auto;padding:30px 24px 120px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+.head h1{font-family:'Cormorant Garamond';font-weight:600;font-size:46px;line-height:.95;margin:0 0 6px}
+.head .sub{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.head .sub b{color:var(--copper-br);font-weight:600}
+.period{border:1px solid var(--line2);border-radius:8px;padding:9px 14px;color:var(--ink2);font-size:12px;background:var(--panel)}
+
+/* ---------- kpi strip ---------- */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.kpi .v{font-family:'Cormorant Garamond';font-weight:600;font-size:30px;line-height:1;margin-top:8px;letter-spacing:.01em}
+.kpi .v small{font-size:14px;color:var(--muted);font-family:'JetBrains Mono'}
+.kpi .delta{font-size:10px;color:var(--faint);margin-top:5px}
+.kpi.alert .v{color:var(--red)}
+.kpi.amb .v{color:var(--purple)}
+
+/* ---------- fleet bar ---------- */
+.fleet{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:22px}
+.fleet .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.fleetbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--panel3)}
+.fleetbar span{height:100%;transition:width .5s ease}
+.fleetlegend{display:flex;gap:20px;margin-top:12px;flex-wrap:wrap}
+.fleetlegend div{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink2)}
+.sw{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+/* ---------- controls ---------- */
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:0 12px}
+.search input{flex:1;background:none;border:none;color:var(--ink);font-family:inherit;font-size:13px;padding:11px 0;outline:none}
+.search input::placeholder{color:var(--faint)}
+.chip{border:1px solid var(--line2);background:var(--panel);color:var(--ink2);border-radius:7px;padding:9px 13px;font-size:11px;letter-spacing:.04em;display:flex;align-items:center;gap:7px;transition:.15s}
+.chip:hover{border-color:var(--copper)}
+.chip.active{background:var(--panel3);border-color:var(--copper-br);color:var(--ink)}
+.chip .cnt{color:var(--faint);font-size:10px}
+.chip.active .cnt{color:var(--copper-br)}
+.sel-tier{background:var(--panel);border:1px solid var(--line2);color:var(--ink2);border-radius:8px;padding:9px 12px;font-size:11px;outline:none}
+
+/* ---------- table ---------- */
+.tablewrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--panel2);white-space:nowrap}
+thead th.r{text-align:right}
+tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,.022);cursor:pointer}
+tbody tr:last-child td{border-bottom:none}
+.co{display:flex;flex-direction:column;gap:2px}
+.co .nm{font-weight:600;font-size:13px;color:var(--ink)}
+.co .cp{font-size:10.5px;color:var(--muted)}
+.tier{font-size:10px;letter-spacing:.06em;border:1px solid var(--line2);border-radius:5px;padding:3px 7px;color:var(--ink2);white-space:nowrap}
+.tier.core{border-color:rgba(156,91,66,.5);color:var(--copper-br)}
+.seats{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink2)}
+.seatbar{width:46px;height:5px;border-radius:3px;background:var(--panel3);overflow:hidden}
+.seatbar span{display:block;height:100%;background:var(--copper)}
+.vit{display:flex;align-items:center;gap:9px}
+.statusdot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 3px var(--glow)}
+.vitnum{font-family:'Cormorant Garamond';font-weight:600;font-size:24px;line-height:1;min-width:30px}
+.comp{display:flex;height:7px;width:118px;border-radius:4px;overflow:hidden;background:var(--panel3)}
+.comp span{height:100%}
+.rec{font-size:11px;color:var(--ink2)}
+.rec small{display:block;font-size:9.5px;color:var(--faint);letter-spacing:.04em}
+.rec.warn{color:var(--amber)}
+.rec.bad{color:var(--red)}
+.arr{font-family:'JetBrains Mono';font-size:12px;text-align:right;color:var(--ink2)}
+.owner{font-size:11px;color:var(--muted)}
+.cbx{width:15px;height:15px;border:1px solid var(--line2);border-radius:4px;background:var(--panel3);display:grid;place-items:center;flex:none}
+.cbx.on{background:var(--copper);border-color:var(--copper)}
+.cbx.on::after{content:"✓";font-size:10px;color:#1a0f0a;font-weight:700}
+.pmark{font-size:9px;letter-spacing:.1em;color:var(--purple);border:1px solid rgba(139,104,194,.45);border-radius:4px;padding:1px 5px;margin-left:7px;vertical-align:middle}
+
+/* ---------- selection bar ---------- */
+.selbar{position:fixed;left:50%;transform:translateX(-50%) translateY(140%);bottom:24px;
+  display:flex;align-items:center;gap:6px;background:#101216;border:1px solid var(--line2);
+  border-radius:12px;padding:11px 12px 11px 18px;z-index:50;box-shadow:0 18px 50px rgba(0,0,0,.6);transition:transform .35s cubic-bezier(.2,.9,.3,1)}
+.selbar.show{transform:translateX(-50%) translateY(0)}
+.selbar .n{font-size:12px;color:var(--ink2);margin-right:10px}
+.selbar .n b{color:var(--copper-br)}
+.btn{border:1px solid var(--line2);background:var(--panel2);color:var(--ink);border-radius:8px;padding:9px 13px;font-size:11.5px;letter-spacing:.03em;transition:.15s;display:flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--copper)}
+.btn.primary{background:var(--copper);border-color:var(--copper);color:#1a0f0a;font-weight:600}
+.btn.primary:hover{background:var(--copper-br)}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink)}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(5,6,8,.6);opacity:0;pointer-events:none;transition:opacity .3s;z-index:60}
+.scrim.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:440px;max-width:94vw;background:var(--panel);
+  border-left:1px solid var(--line2);z-index:61;transform:translateX(102%);transition:transform .35s cubic-bezier(.2,.9,.3,1);
+  display:flex;flex-direction:column;box-shadow:-30px 0 60px rgba(0,0,0,.5)}
+.drawer.show{transform:translateX(0)}
+.dr-head{padding:22px 24px 18px;border-bottom:1px solid var(--line);position:relative}
+.dr-close{position:absolute;top:18px;right:18px;width:30px;height:30px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--muted);display:grid;place-items:center;font-size:15px}
+.dr-close:hover{color:var(--ink)}
+.dr-co{font-weight:600;font-size:17px;color:var(--ink);padding-right:40px}
+.dr-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.dr-vit{display:flex;align-items:flex-end;gap:14px;margin-top:18px}
+.dr-vit .big{font-family:'Cormorant Garamond';font-weight:600;font-size:62px;line-height:.8}
+.bandpill{font-size:10px;letter-spacing:.12em;text-transform:uppercase;border-radius:6px;padding:5px 9px;font-weight:600;align-self:center}
+.dr-body{padding:6px 24px 40px;overflow-y:auto;flex:1}
+.dr-sec{padding:20px 0;border-bottom:1px solid var(--line)}
+.dr-sec:last-child{border-bottom:none}
+.dr-sec .lbl{margin-bottom:14px;display:block}
+.dim{margin-bottom:14px}
+.dim .top{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px}
+.dim .top .nm{color:var(--ink2)}
+.dim .top .nm em{color:var(--faint);font-style:normal;margin-left:6px;font-size:10px}
+.dim .top .vl{font-family:'Cormorant Garamond';font-size:17px;font-weight:600}
+.track{height:7px;border-radius:4px;background:var(--panel3);overflow:hidden}
+.track span{display:block;height:100%;border-radius:4px}
+.gate{display:flex;align-items:center;justify-content:space-between;margin-top:6px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-size:11px}
+.gate .mult{font-family:'Cormorant Garamond';font-size:20px;font-weight:600}
+.gate.bite .mult{color:var(--amber)}
+.gate.bite.hard .mult{color:var(--red)}
+.formula{font-size:10.5px;color:var(--faint);margin-top:10px;line-height:1.6}
+.kv{display:flex;justify-content:space-between;padding:7px 0;font-size:12px;border-bottom:1px dashed var(--line)}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--muted)}
+.kv .v{color:var(--ink2)}
+.kv .v a{color:var(--copper-br);text-decoration:none}
+.kv .v a:hover{text-decoration:underline}
+.apptag{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--ink2);padding:8px 0}
+.apptag .pd{width:8px;height:8px;border-radius:50%}
+.appoff{color:var(--faint)}
+.sig{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--ink2);padding:6px 0}
+.sig .ic{color:var(--purple)}
+.tl{position:relative;padding-left:16px}
+.tl::before{content:"";position:absolute;left:3px;top:4px;bottom:4px;width:1px;background:var(--line2)}
+.tli{position:relative;padding:5px 0 5px 0;font-size:11px;color:var(--ink2)}
+.tli::before{content:"";position:absolute;left:-16px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--copper)}
+.tli small{color:var(--faint);margin-right:8px}
+.dr-actions{display:flex;gap:8px;padding:16px 24px;border-top:1px solid var(--line);background:var(--panel2)}
+.dr-actions .btn{flex:1;justify-content:center}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:rgba(5,6,8,.62)}
+.modal.show{display:grid}
+.modalcard{width:480px;max-width:92vw;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:24px}
+.modalcard h3{font-family:'Cormorant Garamond';font-weight:600;font-size:24px;margin:0 0 4px}
+.modalcard .desc{font-size:11.5px;color:var(--muted);margin-bottom:16px}
+.modalcard textarea{width:100%;min-height:110px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;color:var(--ink);font-family:inherit;font-size:13px;padding:12px;resize:vertical;outline:none}
+.modalcard textarea:focus{border-color:var(--copper)}
+.modalnote{display:flex;gap:9px;align-items:flex-start;font-size:10.5px;color:var(--faint);margin:12px 0 18px;line-height:1.5}
+.modalrow{display:flex;gap:8px;justify-content:flex-end}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140%);background:#101216;border:1px solid var(--line2);border-left:3px solid var(--green);border-radius:10px;padding:13px 18px;font-size:12px;color:var(--ink);z-index:90;transition:transform .35s;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1080px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .head h1{font-size:36px}
+  table{min-width:760px}
+  .tablewrap{overflow-x:auto}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+:focus-visible{outline:2px solid var(--copper-br);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="mark">M</div>
+  <div class="brand"><span class="t">OS49 GROUND CONTROL</span><span class="s">Super Admin</span></div>
+  <div class="spacer"></div>
+  <div class="ctx"><span class="dotlive"></span> 30 accounts live · Juni 2026</div>
+  <div class="avatar">T</div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1 class="serif">Vitals</h1>
+      <div class="sub">Accountgezondheid &amp; sturing · <b>append-only telemetrie</b></div>
+    </div>
+    <div class="period">Juni 2026 ▾</div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="fleet">
+    <div class="row">
+      <span class="lbl">Vlootstatus</span>
+      <span class="lbl" id="fleetcount"></span>
+    </div>
+    <div class="fleetbar" id="fleetbar"></div>
+    <div class="fleetlegend" id="fleetlegend"></div>
+  </div>
+
+  <div class="controls">
+    <div class="search">
+      <span style="color:var(--faint)">⌕</span>
+      <input id="search" placeholder="Zoek op bedrijf of contactpersoon…">
+    </div>
+    <div class="chip active" data-band="all">Alle <span class="cnt" id="c-all"></span></div>
+    <div class="chip" data-band="purple"><span class="sw" style="background:var(--purple)"></span>Ambassadeur <span class="cnt" id="c-purple"></span></div>
+    <div class="chip" data-band="green"><span class="sw" style="background:var(--green)"></span>Groen <span class="cnt" id="c-green"></span></div>
+    <div class="chip" data-band="amber"><span class="sw" style="background:var(--amber)"></span>Oranje <span class="cnt" id="c-amber"></span></div>
+    <div class="chip" data-band="red"><span class="sw" style="background:var(--red)"></span>Rood <span class="cnt" id="c-red"></span></div>
+    <select class="sel-tier" id="tier">
+      <option value="all">Alle tiers</option>
+      <option value="Core">Core</option>
+      <option value="Mission Control">Mission Control</option>
+      <option value="Ops Grid">Ops Grid</option>
+      <option value="Strategic Base">Strategic Base</option>
+    </select>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th style="width:36px"><div class="cbx" id="selall"></div></th>
+        <th>Bedrijf</th>
+        <th>Tier</th>
+        <th>Seats</th>
+        <th>Vitals</th>
+        <th>Samenstelling</th>
+        <th>Laatste actie</th>
+        <th class="r">ARR</th>
+        <th>Eigenaar</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- selection bar -->
+<div class="selbar" id="selbar">
+  <span class="n"><b id="seln">0</b> geselecteerd</span>
+  <button class="btn primary" onclick="openPush()">Push-bericht sturen</button>
+  <button class="btn" onclick="exportEmails()">E-mails exporteren</button>
+  <button class="btn ghost" onclick="clearSel()">Wis selectie</button>
+</div>
+
+<!-- drawer -->
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-label="Accountdetail"></aside>
+
+<!-- push modal -->
+<div class="modal" id="modal">
+  <div class="modalcard">
+    <h3 class="serif" id="modalTitle">Push-bericht sturen</h3>
+    <div class="desc" id="modalDesc"></div>
+    <textarea id="pushText" placeholder="Bv. Je runway zakt onder 1 maand — zullen we deze week even bellen?"></textarea>
+    <div class="modalnote"><span>◔</span><span>Verschijnt als pop-up over hun dashboard bij de eerstvolgende login. Geen e-mail, geen notificatie buiten de app.</span></div>
+    <div class="modalrow">
+      <button class="btn ghost" onclick="closePush()">Annuleren</button>
+      <button class="btn primary" onclick="sendPush()">Plan push</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- mock data ---------------- */
+const OWNERS = {Tibor:"Tibor",Bart:"Bart",Atay:"Atay",Joram:"Joram",Nina:"Nina"};
+const ACCOUNTS = [
+ {co:"Raaijmakers Bouwgroep",cp:"Stan Raaijmakers",em:"stan@raaijmakersbouw.nl",ph:"06 24 11 88 02",tier:"Core",arr:9180,sg:6,d:{ritme:88,verank:92,adoptie:80,result:85},rec:1,own:"Atay",amb:["Google-review (5★)","2 referrals","NPS 10","Actief op CLUB49"]},
+ {co:"Delilah Recruitment",cp:"Delilah Hoogstad",em:"delilah@delilahrecruitment.nl",ph:"06 41 50 22 19",tier:"Core",arr:7440,sg:6,d:{ritme:82,verank:86,adoptie:78,result:80},rec:2,own:"Bart",amb:["Case study akkoord","1 referral","NPS 9"]},
+ {co:"Reuver Woningbouw",cp:"Mike de Reuver",em:"mike@reuverwoningbouw.nl",ph:"06 18 77 34 56",tier:"Core",arr:8650,sg:7,d:{ritme:79,verank:84,adoptie:72,result:77},rec:3,own:"Atay",amb:["Google-review (5★)","Actief op CLUB49"]},
+ {co:"Veldhuis Interim",cp:"Sanne Veldhuis",em:"sanne@veldhuisinterim.nl",ph:"06 33 92 41 70",tier:"Core",arr:6890,sg:6,d:{ritme:76,verank:80,adoptie:74,result:78},rec:2,own:"Joram",amb:["3 referrals","NPS 9"]},
+ {co:"Brouwer Installatietechniek",cp:"Tom Brouwer",em:"tom@brouwer-installatie.nl",ph:"06 50 14 28 33",tier:"Core",arr:7120,sg:6,d:{ritme:78,verank:74,adoptie:70,result:72},rec:3,own:"Bart",amb:[]},
+ {co:"Hofman Advies",cp:"Iris Hofman",em:"iris@hofmanadvies.nl",ph:"06 29 63 70 14",tier:"Mission Control",arr:1788,sg:6,d:{ritme:80,verank:72,adoptie:76,result:74},rec:3,own:"Tibor",amb:[]},
+ {co:"KvD Logistiek",cp:"Karel van Dijk",em:"karel@kvdlogistiek.nl",ph:"06 12 45 89 60",tier:"Core",arr:8040,sg:8,d:{ritme:72,verank:76,adoptie:68,result:70},rec:2,own:"Joram",amb:[]},
+ {co:"Mertens Dental",cp:"Paul Mertens",em:"paul@mertensdental.nl",ph:"06 47 30 15 92",tier:"Ops Grid",arr:1788,sg:6,d:{ritme:74,verank:70,adoptie:72,result:68},rec:3,own:"Atay",amb:[]},
+ {co:"Studio Lichtveld",cp:"Noa Lichtveld",em:"noa@studiolichtveld.nl",ph:"06 81 22 47 05",tier:"Strategic Base",arr:1788,sg:6,d:{ritme:76,verank:68,adoptie:70,result:73},rec:3,own:"Nina",amb:[]},
+ {co:"Verheij Transport",cp:"Rob Verheij",em:"rob@verheijtransport.nl",ph:"06 55 19 04 77",tier:"Core",arr:9990,sg:9,d:{ritme:78,verank:80,adoptie:74,result:76},rec:12,own:"Bart",amb:[]},
+ {co:"Bloem & Co Accountants",cp:"Wendy Bloem",em:"wendy@bloemenco.nl",ph:"06 38 70 26 41",tier:"Mission Control",arr:1788,sg:6,d:{ritme:58,verank:54,adoptie:60,result:56},rec:5,own:"Tibor",amb:[]},
+ {co:"Okhuijsen Retail",cp:"Daan Okhuijsen",em:"daan@okhuijsenretail.nl",ph:"06 90 41 33 28",tier:"Core",arr:6450,sg:6,d:{ritme:50,verank:48,adoptie:55,result:52},rec:6,own:"Joram",amb:[]},
+ {co:"Prins Koeltechniek",cp:"Eric Prins",em:"eric@prinskoeltechniek.nl",ph:"06 27 84 50 13",tier:"Ops Grid",arr:1788,sg:6,d:{ritme:62,verank:58,adoptie:54,result:50},rec:7,own:"Atay",amb:[]},
+ {co:"Spaargaren Makelaars",cp:"Lisa Spaargaren",em:"lisa@spaargarenmakelaars.nl",ph:"06 14 60 29 85",tier:"Core",arr:5940,sg:6,d:{ritme:34,verank:30,adoptie:28,result:32},rec:18,own:"Bart",amb:[]},
+ {co:"Triple-A Webshops",cp:"Faisal Amini",em:"faisal@triplea-webshops.nl",ph:"06 72 38 11 49",tier:"Mission Control",arr:1788,sg:6,d:{ritme:28,verank:22,adoptie:30,result:26},rec:22,own:"Tibor",amb:[]},
+ {co:"De Wit Schoonmaak",cp:"Hans de Wit",em:"hans@dewitschoonmaak.nl",ph:"06 63 05 47 20",tier:"Core",arr:5940,sg:6,d:{ritme:20,verank:12,adoptie:18,result:15},rec:40,own:"Joram",amb:[]},
+];
+
+const WEIGHTS={ritme:.30,verank:.30,adoptie:.20,result:.20};
+const ENTITLE={
+ "Core":["mission_control","ops_grid","strategic_base"],
+ "Mission Control":["mission_control"],
+ "Ops Grid":["ops_grid"],
+ "Strategic Base":["strategic_base"],
+};
+const APPNAMES={mission_control:"Mission Control",ops_grid:"Ops Grid",strategic_base:"Strategic Base"};
+
+function gate(days){
+  if(days<=3)return 1.0; if(days<=7)return .9; if(days<=14)return .75; if(days<=30)return .55; return .4;
+}
+function rawScore(d){return d.ritme*WEIGHTS.ritme + d.verank*WEIGHTS.verank + d.adoptie*WEIGHTS.adoptie + d.result*WEIGHTS.result;}
+function vitals(a){return Math.round(rawScore(a.d)*gate(a.rec));}
+function band(a){
+  const v=vitals(a);
+  if(v>=70 && a.amb.length>0) return "purple";
+  if(v>=70) return "green";
+  if(v>=40) return "amber";
+  return "red";
+}
+const BAND={
+  purple:{c:"var(--purple)",glow:"rgba(139,104,194,.2)",label:"Ambassadeur",bg:"rgba(139,104,194,.15)",tx:"#c4adef"},
+  green:{c:"var(--green)",glow:"rgba(47,129,100,.2)",label:"Sterk",bg:"rgba(47,129,100,.15)",tx:"#7fd3b3"},
+  amber:{c:"var(--amber)",glow:"rgba(217,164,65,.2)",label:"Aandacht",bg:"rgba(217,164,65,.15)",tx:"#e8c987"},
+  red:{c:"var(--red)",glow:"rgba(192,57,43,.2)",label:"Churnzone",bg:"rgba(192,57,43,.15)",tx:"#e89086"},
+};
+const DIMS=[
+ {k:"ritme",nm:"Ritme",w:"30%",c:"var(--d-ritme)",hint:"wekelijkse loops"},
+ {k:"verank",nm:"Verankering",w:"30%",c:"var(--d-verank)",hint:"team vs alleen admin"},
+ {k:"adoptie",nm:"Adoptie",w:"20%",c:"var(--d-adoptie)",hint:"breedte van gebruik"},
+ {k:"result",nm:"Resultaat",w:"20%",c:"var(--d-result)",hint:"grip & targets"},
+];
+function seatsActive(a){return Math.max(1,Math.round(a.d.verank/100*a.sg));}
+function euro(n){return "€ "+n.toLocaleString("nl-NL");}
+
+/* ---------------- state ---------------- */
+let filterBand="all", filterTier="all", query="", selected=new Set();
+
+function visible(){
+  return ACCOUNTS.filter(a=>{
+    if(filterBand!=="all" && band(a)!==filterBand) return false;
+    if(filterTier!=="all" && a.tier!==filterTier) return false;
+    if(query){const q=query.toLowerCase(); if(!(a.co.toLowerCase().includes(q)||a.cp.toLowerCase().includes(q))) return false;}
+    return true;
+  });
+}
+
+/* ---------------- render: kpis + fleet ---------------- */
+function renderTop(){
+  const counts={purple:0,green:0,amber:0,red:0};
+  ACCOUNTS.forEach(a=>counts[band(a)]++);
+  const arr=ACCOUNTS.reduce((s,a)=>s+a.arr,0);
+  const avg=Math.round(ACCOUNTS.reduce((s,a)=>s+vitals(a),0)/ACCOUNTS.length);
+  const risk=counts.red+counts.amber;
+  const seatsExtra=ACCOUNTS.reduce((s,a)=>s+Math.max(0,seatsActive(a)-6),0);
+
+  document.getElementById("kpis").innerHTML=`
+    <div class="kpi"><span class="lbl">Accounts</span><div class="v">${ACCOUNTS.length}</div><div class="delta">van 30 ambassadeurs · demo-subset</div></div>
+    <div class="kpi"><span class="lbl">ARR</span><div class="v">${euro(arr)}</div><div class="delta">terugkerende omzet</div></div>
+    <div class="kpi"><span class="lbl">Gem. Vitals</span><div class="v">${avg}<small> /100</small></div><div class="delta">gewogen, na recency-gate</div></div>
+    <div class="kpi alert"><span class="lbl">Churn-risico</span><div class="v">${risk}</div><div class="delta">rood + oranje accounts</div></div>
+    <div class="kpi amb"><span class="lbl">Ambassadeurs</span><div class="v">${counts.purple}</div><div class="delta">groen + advocacy-signaal</div></div>
+    <div class="kpi"><span class="lbl">Extra seats</span><div class="v">${seatsExtra}</div><div class="delta">boven 6 incl. · €50/seat/jr</div></div>`;
+
+  const total=ACCOUNTS.length;
+  const order=["purple","green","amber","red"];
+  document.getElementById("fleetbar").innerHTML=order.map(b=>
+    `<span style="width:${counts[b]/total*100}%;background:${BAND[b].c}"></span>`).join("");
+  document.getElementById("fleetlegend").innerHTML=order.map(b=>
+    `<div><span class="sw" style="background:${BAND[b].c}"></span>${BAND[b].label} · ${counts[b]}</div>`).join("");
+  document.getElementById("fleetcount").textContent=`${total} accounts gemonitord`;
+
+  document.getElementById("c-all").textContent=total;
+  document.getElementById("c-purple").textContent=counts.purple;
+  document.getElementById("c-green").textContent=counts.green;
+  document.getElementById("c-amber").textContent=counts.amber;
+  document.getElementById("c-red").textContent=counts.red;
+}
+
+/* ---------------- render: table ---------------- */
+function compBar(a){
+  // weighted contributions as segments; remainder = headroom
+  return DIMS.map(dm=>{
+    const pts=a.d[dm.k]*WEIGHTS[dm.k]; // out of 100 total
+    return `<span style="width:${pts}%;background:${dm.c}"></span>`;
+  }).join("");
+}
+function recCell(a){
+  const cls=a.rec>14?"bad":a.rec>7?"warn":"";
+  const g=gate(a.rec);
+  const note=g<1?`gate ×${g.toFixed(2)}`:"vol gewicht";
+  return `<div class="rec ${cls}">${a.rec===1?"1 dag":a.rec+" dagen"}<small>${note}</small></div>`;
+}
+function renderTable(){
+  const rows=visible();
+  document.getElementById("tbody").innerHTML=rows.map((a)=>{
+    const i=ACCOUNTS.indexOf(a);
+    const b=band(a), B=BAND[b];
+    const sa=seatsActive(a);
+    return `<tr onclick="openDrawer(${i})">
+      <td onclick="event.stopPropagation();toggleSel(${i})"><div class="cbx ${selected.has(i)?'on':''}"></div></td>
+      <td><div class="co"><span class="nm">${a.co}${b==='purple'?'<span class="pmark">AMB</span>':''}</span><span class="cp">${a.cp}</span></div></td>
+      <td><span class="tier ${a.tier==='Core'?'core':''}">${a.tier}</span></td>
+      <td><div class="seats"><div class="seatbar"><span style="width:${sa/a.sg*100}%"></span></div>${sa}/${a.sg}</div></td>
+      <td><div class="vit"><span class="statusdot" style="background:${B.c};--glow:${B.glow}"></span><span class="vitnum" style="color:${B.c}">${vitals(a)}</span></div></td>
+      <td><div class="comp">${compBar(a)}</div></td>
+      <td>${recCell(a)}</td>
+      <td class="arr">${euro(a.arr)}</td>
+      <td><span class="owner">${a.own}</span></td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--faint)">Geen accounts in deze selectie.</td></tr>`;
+  // select-all reflects current visible
+  const allSel=rows.length>0 && rows.every(a=>selected.has(ACCOUNTS.indexOf(a)));
+  document.getElementById("selall").className="cbx "+(allSel?"on":"");
+}
+
+/* ---------------- selection ---------------- */
+function toggleSel(i){selected.has(i)?selected.delete(i):selected.add(i);syncSel();renderTable();}
+function clearSel(){selected.clear();syncSel();renderTable();}
+function syncSel(){
+  const bar=document.getElementById("selbar");
+  document.getElementById("seln").textContent=selected.size;
+  bar.classList.toggle("show",selected.size>0);
+}
+document.getElementById("selall").onclick=()=>{
+  const rows=visible();
+  const allSel=rows.length>0 && rows.every(a=>selected.has(ACCOUNTS.indexOf(a)));
+  rows.forEach(a=>{const i=ACCOUNTS.indexOf(a); allSel?selected.delete(i):selected.add(i);});
+  syncSel();renderTable();
+};
+
+/* ---------------- export ---------------- */
+function exportEmails(){
+  const list=[...selected].map(i=>ACCOUNTS[i]);
+  if(!list.length)return;
+  const head=["Bedrijf","Contactpersoon","E-mail","Telefoon","Tier","Vitals","Band","Eigenaar"];
+  const rows=list.map(a=>[a.co,a.cp,a.em,a.ph,a.tier,vitals(a),BAND[band(a)].label,a.own]);
+  const csv=[head,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  link.href=url; link.download=`os49-vitals-export-${list.length}.csv`; link.click();
+  URL.revokeObjectURL(url);
+  toast(`${list.length} contact(en) geëxporteerd naar CSV.`);
+}
+
+/* ---------------- push ---------------- */
+let pushScope=null; // {ids:[...]} or single
+function openPush(single){
+  pushScope = single!=null ? {ids:[single]} : {ids:[...selected]};
+  if(!pushScope.ids.length)return;
+  const n=pushScope.ids.length;
+  document.getElementById("modalDesc").textContent= n===1
+    ? `Naar ${ACCOUNTS[pushScope.ids[0]].co}` : `Naar ${n} geselecteerde accounts`;
+  document.getElementById("pushText").value="";
+  document.getElementById("modal").classList.add("show");
+  setTimeout(()=>document.getElementById("pushText").focus(),50);
+}
+function closePush(){document.getElementById("modal").classList.remove("show");}
+function sendPush(){
+  const n=pushScope.ids.length;
+  closePush();
+  toast(`Push-bericht gepland voor ${n} account(s) — verschijnt bij eerstvolgende login.`);
+  if(selected.size){clearSel();}
+}
+
+/* ---------------- drawer ---------------- */
+function openDrawer(i){
+  const a=ACCOUNTS[i], b=band(a), B=BAND[b];
+  const raw=rawScore(a.d), g=gate(a.rec), v=vitals(a);
+  const entitled=ENTITLE[a.tier];
+  const sa=seatsActive(a);
+  const gbite = g<1 ? (g<=.55?"bite hard":"bite") : "";
+
+  const dimsHtml=DIMS.map(dm=>`
+    <div class="dim">
+      <div class="top"><span class="nm">${dm.nm}<em>${dm.w} · ${dm.hint}</em></span><span class="vl" style="color:${dm.c}">${a.d[dm.k]}</span></div>
+      <div class="track"><span style="width:${a.d[dm.k]}%;background:${dm.c}"></span></div>
+    </div>`).join("");
+
+  const appsHtml=["mission_control","ops_grid","strategic_base"].map(app=>{
+    const on=entitled.includes(app);
+    return `<div class="apptag ${on?'':'appoff'}"><span class="pd" style="background:${on?'var(--green)':'var(--faint)'}"></span>${APPNAMES[app]} ${on?'':'· geen toegang'}</div>`;
+  }).join("");
+
+  const ambHtml = a.amb.length
+    ? a.amb.map(s=>`<div class="sig"><span class="ic">◆</span>${s}</div>`).join("")
+    : `<div style="font-size:11px;color:var(--faint)">Nog geen advocacy-signaal. Groen + één signaal (review, referral, NPS-promoter, case study) = ambassadeur.</div>`;
+
+  // mock event timeline derived from data
+  const ev=[];
+  if(a.rec<=3) ev.push([`${a.rec}d`,"Laatste login + KPI-update in Mission Control"]);
+  else ev.push([`${a.rec}d`,"Laatste betekenisvolle actie"]);
+  if(entitled.includes("ops_grid")) ev.push(["4d", a.d.verank>60?"3 medewerkers vinkten SOP's af (op tijd)":"SOP-deadline verstreken — niet afgevinkt"]);
+  if(entitled.includes("mission_control")) ev.push(["6d", a.d.adoptie>60?"AI-adviseur geraadpleegd":"Profit Protector niet bekeken deze maand"]);
+  if(entitled.includes("strategic_base")) ev.push(["9d", a.d.result>60?"Kwartaalplan bijgewerkt":"Jaarplan staat, kwartaalplan ontbreekt"]);
+  const evHtml=ev.map(e=>`<div class="tli"><small>${e[0]}</small>${e[1]}</div>`).join("");
+
+  document.getElementById("drawer").innerHTML=`
+    <div class="dr-head">
+      <button class="dr-close" onclick="closeDrawer()">✕</button>
+      <div class="dr-co">${a.co}</div>
+      <div class="dr-meta">${a.cp} · ${a.tier} · eigenaar ${a.own}</div>
+      <div class="dr-vit">
+        <span class="big" style="color:${B.c}">${v}</span>
+        <span style="color:var(--faint);font-size:13px;margin-bottom:8px">/100</span>
+        <span class="bandpill" style="background:${B.bg};color:${B.tx}">${B.label}</span>
+      </div>
+    </div>
+    <div class="dr-body">
+      <div class="dr-sec">
+        <span class="lbl">Hoe dit is berekend</span>
+        ${dimsHtml}
+        <div class="gate ${gbite}">
+          <span style="color:var(--muted)">Recency-gate · ${a.rec===1?'1 dag':a.rec+' dagen'} stil</span>
+          <span class="mult">×${g.toFixed(2)}</span>
+        </div>
+        <div class="formula">Gewogen ruwe score ${raw.toFixed(1)} × gate ${g.toFixed(2)} = <b style="color:${B.c}">${v}</b>.
+        ${g<1?'De gate knijpt de score af: recency is de #1 vroegwaarschuwing.':'Volledig gewicht — recent actief.'}
+        Deterministisch op basis van eigen events.</div>
+      </div>
+
+      <div class="dr-sec">
+        <span class="lbl">Contact</span>
+        <div class="kv"><span class="k">Contactpersoon</span><span class="v">${a.cp}</span></div>
+        <div class="kv"><span class="k">E-mail</span><span class="v"><a href="mailto:${a.em}">${a.em}</a></span></div>
+        <div class="kv"><span class="k">Telefoon</span><span class="v">${a.ph}</span></div>
+        <div class="kv"><span class="k">ARR</span><span class="v">${euro(a.arr)}</span></div>
+      </div>
+
+      <div class="dr-sec">
+        <span class="lbl">Verankering · seats</span>
+        <div class="kv"><span class="k">Actieve seats</span><span class="v">${sa} van ${a.sg}</span></div>
+        <div class="track" style="margin-top:8px"><span style="width:${sa/a.sg*100}%;background:var(--copper)"></span></div>
+        <div class="formula">${sa<=1?'Alleen de admin actief — grootste churn-risico in deze dimensie.':'Meerdere seats actief: tool zit in de operatie verankerd.'} ${sa>6?'Boven inbegrepen 6 → '+(sa-6)+' × €50/jr upsell zichtbaar.':''}</div>
+      </div>
+
+      <div class="dr-sec">
+        <span class="lbl">Adoptie per app</span>
+        ${appsHtml}
+        <div class="formula">Score wordt genormaliseerd naar wat dit account heeft. Niet-gekochte lagen tellen niet mee.</div>
+      </div>
+
+      <div class="dr-sec">
+        <span class="lbl">Ambassadeur-signalen</span>
+        ${ambHtml}
+      </div>
+
+      <div class="dr-sec">
+        <span class="lbl">Recente telemetrie</span>
+        <div class="tl">${evHtml}</div>
+      </div>
+    </div>
+    <div class="dr-actions">
+      <button class="btn primary" onclick="openPush(${i})">Push-bericht</button>
+      <button class="btn" onclick="location.href='mailto:${a.em}'">E-mail</button>
+      <button class="btn" onclick="toast('Notitie-paneel komt in de echte build.')">Notitie</button>
+    </div>`;
+  document.getElementById("drawer").classList.add("show");
+  document.getElementById("scrim").classList.add("show");
+}
+function closeDrawer(){
+  document.getElementById("drawer").classList.remove("show");
+  document.getElementById("scrim").classList.remove("show");
+}
+
+/* ---------------- toast ---------------- */
+let toastT;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),3200);
+}
+
+/* ---------------- wire controls ---------------- */
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
+  c.classList.add("active"); filterBand=c.dataset.band; renderTable();
+});
+document.getElementById("tier").onchange=e=>{filterTier=e.target.value;renderTable();};
+document.getElementById("search").oninput=e=>{query=e.target.value;renderTable();};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();closePush();}});
+
+/* ---------------- init ---------------- */
+renderTop(); renderTable();
+</script>
+</body>
+</html>

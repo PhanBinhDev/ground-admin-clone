@@ -1,26 +1,123 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-display: var(--font-cinzel), "Times New Roman", serif;
+  --font-serif:   var(--font-cormorant), Georgia, serif;
+  --font-mono:    var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-sans:    var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-heading: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --color-ring:               var(--ring);
+  --color-input:              var(--input);
+  --color-border:             var(--border);
+  --color-destructive:        var(--destructive);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-accent:             var(--accent);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-muted:              var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary:          var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary:            var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover:            var(--popover);
+  --color-card-foreground:    var(--card-foreground);
+  --color-card:               var(--card);
+
+  /* GC named colors → Tailwind utilities */
+  --color-obsidian:    var(--obsidian);
+  --color-panel:       var(--panel);
+  --color-panel2:      var(--panel2);
+  --color-panel3:      var(--panel3);
+  --color-ink:         var(--ink);
+  --color-ink2:        var(--ink2);
+  --color-muted-color: var(--muted-color);
+  --color-faint:       var(--faint);
+  --color-copper:      var(--copper);
+  --color-copper-br:   var(--copper-br);
+  --color-line:        var(--line);
+  --color-line2:       var(--line2);
+
+  --color-band-red:    #C0392B;
+  --color-band-amber:  #D9A441;
+  --color-band-green:  #2F8164;
+  --color-band-purple: #8B68C2;
+  --color-blueprint:   #4F7BB0;
+  --color-dim-ritme:   #BC7053;
+  --color-dim-verank:  #4F7BB0;
+  --color-dim-adoptie: #CBA14A;
+  --color-dim-result:  #5E9E7E;
+
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --obsidian:   #0B0C0E;
+  --panel:      #15171C;
+  --panel2:     #1B1E25;
+  --panel3:     #22262E;
+  --line:       rgba(233,228,220,.09);
+  --line2:      rgba(233,228,220,.16);
+  --ink:        #E9E4DC;
+  --ink2:       #C9C4B9;
+  --muted-color: #8E8A80;
+  --faint:      #65625B;
+  --copper:     #9C5B42;
+  --copper-br:  #BC7053;
+
+  --background:          var(--obsidian);
+  --foreground:          var(--ink);
+  --card:                var(--panel);
+  --card-foreground:     var(--ink);
+  --popover:             var(--panel2);
+  --popover-foreground:  var(--ink);
+  --primary:             var(--copper-br);
+  --primary-foreground:  #1a0f0a;
+  --secondary:           var(--panel3);
+  --secondary-foreground: var(--ink2);
+  --muted:               var(--panel2);
+  --muted-foreground:    var(--muted-color);
+  --accent:              var(--panel3);
+  --accent-foreground:   var(--ink);
+  --destructive:         oklch(0.55 0.2 27);
+  --border:              var(--line2);
+  --input:               var(--line2);
+  --ring:                var(--copper-br);
+  --radius:              6px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  html {
+    @apply font-sans;
+  }
+  ::selection {
+    background: rgba(156, 91, 66, .35);
+  }
+  :focus-visible {
+    outline: 2px solid var(--copper-br);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }
