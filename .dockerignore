@@ -1,0 +1,19 @@
+node_modules
+.next
+.git
+.github
+.husky
+.vscode
+.idea
+.claude
+
+# secrets — never bake into the image (NEXT_PUBLIC_* come via build args)
+.env
+.env.*
+!.env.example
+
+# not needed in the image
+docs
+*.log
+.DS_Store
+README.md
